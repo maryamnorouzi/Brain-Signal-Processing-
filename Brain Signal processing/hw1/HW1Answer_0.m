@@ -1,9 +1,8 @@
 function HW1Answer()
 %% This is a matlab syntac that reports the answers to Homework 1 for the ELE573 Brain Signal Processing and App for Fall 2023 C Behtom Adeli
-% Developed by Behtom Adeli
-% Sep 25, 2023
+% help goes here
 
-load("sampleEEGdata.mat","EEG");
+load("sampleEEGdata.mat");
 
 %% a) Topoplot of Averaged 0 to 800ms
 
@@ -18,7 +17,7 @@ averaged_splits=mean(EEG.data(:,start_point:end_point,:),3);
 
 figure();
 id= 1;
-sgtitle('a) 2-times averaged over trials & +-20ms points of Raw Data');
+
 for step=step_20ms+1:step_100ms:length(averaged_splits)
     meaned_data =double(mean(averaged_splits(:,step-step_20ms:step+step_20ms),2));
     subplot(3,3,id);
@@ -31,22 +30,25 @@ end
 %% b)
 
 figure();
+channels = cell(1,EEG.nbchan);
 max_peak = zeros(2,EEG.nbchan);
-sgtitle('b) Temporal Average Visualization');
 
-for chnl=1:EEG.nbchan
-    [max_peak(1,chnl), max_peak(2,chnl)] = max(averaged_splits(chnl,step_100ms:end));
-    max_peak(2,chnl)=EEG.times(max_peak(2,chnl)+start_point+step_100ms);
+for chnl=1:size(averaged_splits,1)
+    channels{chnl}=averaged_splits(chnl,:);
+    [max_peak(1,chnl), max_peak(2,chnl)] = max(channels{chnl});
+    max_peak(2,chnl)=EEG.times(max_peak(2,chnl)+start_point);
     subplot(8,8,chnl);
-    plot(EEG.times(1,start_point:end_point),averaged_splits(chnl,:))                                                                                            
+    plot(EEG.times(1,start_point:end_point),channels{chnl})                                                                                            
     title(['Channel ',num2str(chnl)]);
+
 end
+
+
 
 figure();
 topoplot(double(max_peak(2,:)),'eloc64C2.txt','EEG','ColorMap','Jet');
-title(['b) Topoplot of ARP Max Peak Latencies']);
+title(['Topoplot of ARP Max Peak Latencies']);
 hcb=colorbar('southoutside');
-clim([0, 500]);
 hcb.Title.String = "ARP Peak Time Latencies in miliseconds";
 
 
@@ -67,6 +69,8 @@ Z = [EEG.chanlocs.Z];
 % initialize distance matrices
 eucdist = zeros(EEG.nbchan,EEG.nbchan);
 
+
+
 for chnl2=1:EEG.nbchan
     for chnl=1:EEG.nbchan
         eucdist(chnl2,chnl) = sqrt( (X(chnl)-X(chnl2))^2 + (Y(chnl)-Y(chnl2))^2 );
@@ -82,7 +86,6 @@ lo_width = 0.18;
 hi_width = 0.28;
 eucdist_filtered = zeros(64,64);
 figure();
-sgtitle('c) Laplacian Filter Visualization');
 id =1;
 for chn1=1:EEG.nbchan
     for chn2=1:EEG.nbchan
@@ -96,38 +99,15 @@ for chn1=1:EEG.nbchan
     title(['channel' eloc64_fileTable{chn1,4}{1,1}]);
 end
 
-%Calculating Filter Weights
-weights = zeros(EEG.nbchan,EEG.nbchan);
-
+    
 for chn1=1:EEG.nbchan
     for chn2=1:EEG.nbchan
         if eucdist_filtered(chn1,chn2)
-        weights(chn1,chn2)= (1/eucdist_filtered(chn1,chn2))/sum( 1./eucdist_filtered(chn1,eucdist_filtered(chn1,:)~=0));
+        weigths= (1/eucdist_filtered(chn1,chn2))/sum(eucdist_filtered(chn1,:));
         end
     end
 end
 
-%Filtering the Signal
-EEG.laplacianFiltereddata = zeros(size(EEG.data));
-for trl=1:size(EEG.data,3)
-    for pnt=1:size(EEG.data,2)
-       EEG.laplacianFiltereddata (:,pnt,trl)=EEG.data(:,pnt,trl)-weights*EEG.data(:,pnt,trl);
-    end
-end
 
-averaged_splits_filtered=mean(EEG.laplacianFiltereddata(:,start_point:end_point,:),3);
 
-figure();
-id= 1;
-sgtitle('c) 2-times averaged over trials and +-20ms points of Laplacian Filtered Data');
-for step=step_20ms+1:step_100ms:length(averaged_splits_filtered)
-    meaned_data_filtered =double(mean(averaged_splits_filtered(:,step-step_20ms:step+step_20ms),2));
-    subplot(3,3,id);
-    topoplot(meaned_data_filtered,'eloc64C2.txt','EEG','ColorMap','Jet')
-    xlabel('head');                                                                                               
-    title(['Topoplot of ',num2str((id-1)*100), 'ms']);         
-    id=id+1;
-end
-
-disp('It is done.')
-disp('By Behtom Adeli')
+disp('it is done.')
