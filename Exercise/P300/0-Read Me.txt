@@ -1,0 +1,4 @@
+To convert the .dat files extracted from BCI2000:
+
+1- Run loadmyfiles
+2- Ensure that both the load_bcidat.m script and the missing_mex_file.mex file are located in the same directory as the loadmyfiles.m script.

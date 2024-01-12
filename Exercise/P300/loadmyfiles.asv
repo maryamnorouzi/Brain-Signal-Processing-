@@ -1,0 +1,10 @@
+clc
+%file01=load_bcidat('C:\Users\Pankaj\Documents\MARYAM\Demo Exercise\trainingmaterials\imageryruns\imageryS001R03.dat');
+% Specify the .dat file name
+datFileName = 'C:\Users\Pankaj\Documents\MARYAM\BCI2000\P300\pxb010\pxb010\pxbS010R01.dat';
+
+% Use the BCI2000 load function to read the data
+[data, states, parameters] = load_bcidat(datFileName);
+
+% Save the data, states, and parameters to a .mat file
+save('output.mat', 'data', 'states', 'parameters');
